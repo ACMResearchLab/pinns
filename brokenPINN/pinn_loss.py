@@ -10,8 +10,11 @@ F_BOUNDARY = 0.5  # boundary condition value
 def loss_fn(params: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
 
     # interior loss
+    print("pre-worked?")
     f_value = f(x, params)
+    print("pre-interior")
     interior = dfdx(x, params) - R * f_value * (1 - f_value)
+    print("post-interor")
 
     # boundary loss
     x0 = X_BOUNDARY

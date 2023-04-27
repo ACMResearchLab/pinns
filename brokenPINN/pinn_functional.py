@@ -5,16 +5,16 @@ from pinn_nn_pytorch import NNApproximator
 # create the PINN model and make it functional using functorch utilities
 model = NNApproximator()
 fmodel, params = make_functional(model)
-print("Fmodel : ", fmodel)
-print("Params : ", params)
+# print("Fmodel : ", fmodel)
+# print("Params : ", params)
 
 def f(x: torch.Tensor, params: torch.Tensor) -> torch.Tensor:
     # only a single element is supported thus unsqueeze must be applied
     # for batching multiple inputs, `vmap` must be used as below
     x_ = x.unsqueeze(0)
-    print("X underscore is ",x_)
+    # print("X underscore is ", x_)
     res = fmodel(params, x_).squeeze(0)
-    print("\n\n\nIT WORKED!!!!\n\n\n")
+    print("\n\n\nIT WORKED!!!! : ", res, "\n\n\n")
     return res
 
 # use `vmap` primitive to allow efficient batching of the input
