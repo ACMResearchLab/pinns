@@ -4,9 +4,9 @@ from torch import nn
 class NNApproximator(nn.Module):
     def __init__(
         self,
-        num_inputs: int = 1,
-        num_outputs: int = 1,
-        num_hidden: int = 1,
+        num_inputs: int = 30,
+        num_outputs: int = 2,
+        num_hidden: int = 5,
         dim_hidden: int = 5,
         act: nn.Module = nn.Tanh(),
     ) -> None:

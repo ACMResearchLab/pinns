@@ -11,10 +11,10 @@ print("Params : ", params)
 def f(x: torch.Tensor, params: torch.Tensor) -> torch.Tensor:
     # only a single element is supported thus unsqueeze must be applied
     # for batching multiple inputs, `vmap` must be used as below
-    print("TYPE OF X : ", x)
-    print("Unsqueezed : ", x[0].unsqueeze(0))
     x_ = x.unsqueeze(0)
+    print("X underscore is ",x_)
     res = fmodel(params, x_).squeeze(0)
+    print("\n\n\nIT WORKED!!!!\n\n\n")
     return res
 
 # use `vmap` primitive to allow efficient batching of the input
