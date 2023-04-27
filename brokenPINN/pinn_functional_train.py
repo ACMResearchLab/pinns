@@ -19,7 +19,7 @@ for i in range(num_iter):
     print("First x : ", x)
 
     # update the parameters using the functional API
-    loss = f(x, params)
+    loss = loss_fn(x, params)
     params = optimizer.step(loss, params)
 
     print("Iteration {i} with loss {float(loss)}")
