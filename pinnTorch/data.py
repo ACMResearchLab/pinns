@@ -58,6 +58,66 @@ def get_dataset(data_path: Path):
 
 
 def get_orig_dataset():
+    # Get U star
+    print("\n\n\n\n\n U star : ")
+    Uarr = np.zeros((10720, 2, 10))
+    n = 0
+    while (n < 10):
+        fileOpen = 50 + 50*n
+        fileOpenStr = str(fileOpen)
+        file = open("../airFoil2D/"+fileOpenStr+"/U", "r")
+        line = ""
+
+        while(line.find("(") == -1):
+            line = file.readline()
+        line = file.readline()
+        
+        first = line.partition(" ")[0]
+        first = first[1:]
+        second = line.partition(" ")[2]
+        second = second.partition(" ")[0]
+
+        i = 0
+        while(not line.find(".") == -1):
+            first = line.partition(" ")[0]
+            first = first[1:]
+            second = line.partition(" ")[2]
+            second = second.partition(" ")[0]
+            line = file.readline()
+            Uarr[i][0][n] = float(first)
+            Uarr[i][1][n] = float(second)
+            i += 1
+        n += 1
+    print(Uarr)
+    
+
+    # GET P star
+    print("\n\n\n\n\nP star : ")
+    Parr = np.zeros((10720, 10))
+    n = 0
+    while (n < 10):
+        fileOpen = 50 + 50*n
+        fileOpenStr = str(fileOpen)
+        file = open("../airFoil2D/"+fileOpenStr+"/p", "r")
+        line = ""
+
+        while(line.find("(") == -1):
+            line = file.readline()
+        line = file.readline()
+
+        i = 0
+        while(line.find(")") == -1):
+            addToArr = line[0:-1]
+            if (i < 100):
+                print(addToArr)
+                print(line)
+                print(i)
+            Parr[i][n] = float(addToArr)
+            line = file.readline()            
+            i += 1
+        n += 1
+    print(Parr)
+
     path = Path("./cylinder_nektar_wake.mat")
     data = scipy.io.loadmat(path)
     X_star = data["X_star"]  # N x 2
@@ -65,12 +125,19 @@ def get_orig_dataset():
     y = X_star[:, 1:2]
 
     U_star = data["U_star"]  # N x 2 x T
+    # CHANGE THIS TO :
+    # U_star = Uarr
+    # print("\n\n\nU star :", X_star, "\nShape of u star", X_star.shape, "\n\n\n")
     P_star = data["p_star"]  # N x T
+    print(P_star.shape)
     t_star = data["t"]  # T x 1
+
     X_star = data["X_star"]  # N x 2
 
     N = X_star.shape[0]
     T = t_star.shape[0]
+
+    print("\n\n\n\n")
 
     # Rearrange Data
     XX = np.tile(X_star[:, 0:1], (1, T))  # N x T
