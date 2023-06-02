@@ -89,6 +89,7 @@ def get_orig_dataset():
             i += 1
         n += 1
     print(Uarr)
+    print("with size : ", Uarr.size)
     
 
     # GET P star
@@ -108,15 +109,22 @@ def get_orig_dataset():
         i = 0
         while(line.find(")") == -1):
             addToArr = line[0:-1]
-            if (i < 100):
-                print(addToArr)
-                print(line)
-                print(i)
             Parr[i][n] = float(addToArr)
             line = file.readline()            
             i += 1
         n += 1
     print(Parr)
+    print("with size : ", Parr.size, "\n")
+
+
+    # Get t star
+    print("\n\n\n\n\nt star : ")
+    Tarr = np.zeros(10)
+    for i in range(10):
+        Tarr[i] = .5*(i+1)
+    print(Tarr)
+    print("with size : ", Tarr.size, "\n")
+
 
     path = Path("./cylinder_nektar_wake.mat")
     data = scipy.io.loadmat(path)
@@ -124,15 +132,24 @@ def get_orig_dataset():
     x = X_star[:, 0:1]
     y = X_star[:, 1:2]
 
-    U_star = data["U_star"]  # N x 2 x T
-    # CHANGE THIS TO :
-    # U_star = Uarr
+    # U_star = data["U_star"]  # N x 2 x T
+    # t_star = data["t"]  # T x 1
+    # P_star = data["p_star"]  # N x T
+    # CHANGE THESE TO :
+    U_star = Uarr
+    print("size of U : ", U_star.size)
+    P_star = Parr
+    print("size of P : ", P_star.size)
+    t_star = Tarr
+    print("size of t : ", t_star.size)
     # print("\n\n\nU star :", X_star, "\nShape of u star", X_star.shape, "\n\n\n")
-    P_star = data["p_star"]  # N x T
-    print(P_star.shape)
-    t_star = data["t"]  # T x 1
 
-    X_star = data["X_star"]  # N x 2
+
+    # FIGURE OUT X_ STAR, SIZE SHOULD BE SIZE OF U DIVIDED BY SIZE OF T AKA 
+    # X_star = data["X_star"]  # N x 2
+    X_star = np.zeros((10720, 2))
+
+    print("X star size : ", X_star.size)
 
     N = X_star.shape[0]
     T = t_star.shape[0]
