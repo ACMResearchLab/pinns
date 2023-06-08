@@ -6,6 +6,7 @@ from torch.utils.data import RandomSampler, DataLoader
 
 from model import Pinn
 from data import dump_json, PinnDataset
+from data import get_dataset
 
 
 class Trainer:
@@ -63,7 +64,8 @@ class Trainer:
             return None
         return ckpt_dirs[-1]
 
-    def train(self, train_data: PinnDataset, do_resume: bool = True):
+    def trainMultiple(self, train_data: PinnDataset, do_resume: bool = True):
+        datasets = ["mats/simpleCar.csv", "mats/airfoilOrig.csv", "mats/windAroundBuildings.csv"]
         model = self.model
         device = self.device
 
@@ -76,6 +78,80 @@ class Trainer:
             train_data, batch_size=self.batch_size, sampler=sampler
         )
 
+        print("====== Training ======")
+        print(f'device is "{device}"')
+        print(f"# epochs: {self.num_epochs}")
+        print(f"# examples: {len(train_data)}")
+        print(f"# samples used per epoch: {self.samples_per_ep}")
+        print(f"batch size: {self.batch_size}")
+        print(f"# steps: {len(train_loader)}")
+        self.loss_history = []
+        model.train()
+        model.to(device)
+
+        # Resume
+        last_ckpt_dir = self.get_last_ckpt_dir()
+        if do_resume and last_ckpt_dir is not None:
+            print(f"Resuming from {last_ckpt_dir}")
+            self.load_ckpt(last_ckpt_dir)
+            ep = int(last_ckpt_dir.name.split("-")[-1]) + 1
+        else:
+            ep = 0
+
+        train_start_time = time()
+        while ep < self.num_epochs:
+            train_data, test_data, min_x, max_x = get_dataset(datasets[ep%len(datasets)])
+            print(f"====== Epoch {ep} ====== (with {datasets[ep%len(datasets)]})")
+            for step, batch in enumerate(train_loader):
+                inputs = {k: t.to(device) for k, t in batch.items()}
+
+                # Forward
+                outputs = model(**inputs)
+                loss = outputs["loss"]
+                self.loss_history.append(loss.item())
+
+                # Backward
+                loss.backward()
+                self.optimizer.step()
+                self.optimizer.zero_grad()
+
+                if step % self.log_interval == 0:
+                    losses = outputs["losses"]
+                    print(
+                        {
+                            "step": step,
+                            "loss": round(loss.item(), 6),
+                            "lr": round(
+                                self.optimizer.param_groups[0]["lr"], 4
+                            ),
+                            "lambda1": round(self.model.lambda1.item(), 4),
+                            "lambda2": round(self.model.lambda2.item(), 4),
+                            "u_loss": round(losses["u_loss"].item(), 6),
+                            "v_loss": round(losses["v_loss"].item(), 6),
+                            "f_u_loss": round(losses["f_u_loss"].item(), 6),
+                            "f_v_loss": round(losses["f_v_loss"].item(), 6),
+                            "time": round(time() - train_start_time, 1),
+                        }
+                    )
+            self.lr_scheduler.step()
+            self.checkpoint(ep)
+            print(f"====== Epoch {ep} done ======")
+            ep += 1
+        print("====== Training done ======")
+
+    def train(self, train_data: PinnDataset, do_resume: bool = True):
+        model = self.model
+        device = self.device
+
+        sampler = RandomSampler(
+            train_data,
+            replacement=True,
+            num_samples=self.samples_per_ep,
+        )
+        train_loader = DataLoader(
+            train_data, batch_size=self.batch_size, sampler=sampler
+        )
+        
         print("====== Training ======")
         print(f'device is "{device}"')
         print(f"# epochs: {self.num_epochs}")

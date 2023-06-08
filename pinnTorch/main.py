@@ -6,8 +6,9 @@ import torch
 
 from model import Pinn
 from data import (
-    # get_dataset,
-    get_orig_dataset,
+    get_dataset,
+    get_other_dataset,
+    get_orig_dataset
 )
 from trainer import Trainer
 
@@ -54,13 +55,14 @@ def main():
     random.seed(0)
     np.random.seed(0)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "gpu"
     print(f"Using device: {device}")
 
     # Data
     # data_path = Path("E:/donny/code/family/00/data/data.jsonl")
-    # train_data, test_data, min_x, max_x = get_dataset(data_path)
-    train_data, test_data, min_x, max_x = get_orig_dataset()
+
+    train_data, test_data, min_x, max_x = get_dataset("mats/airFoilOrig.csv")
+    # train_data, test_data, min_x, max_x = get_orig_dataset()
 
     # Model
     # hidden_dims = [128, 128, 128, 128, 128, 128, 128, 128]
@@ -70,9 +72,9 @@ def main():
 
     # Train
     output_dir = Path(
-        "result\pinn-large-tanh-bs128-lr0.005-lrstep1-lrgamma0.8-epoch20")
+        "multiInput\pinn-large-tanh-bs128-lr0.005-lrstep1-lrgamma0.8-epoch20")
     trainer = Trainer(model, output_dir)
-    trainer.train(train_data)
+    trainer.trainMultiple(train_data)
 
     # Test
     ckpt_dir = trainer.get_last_ckpt_dir()
@@ -87,6 +89,7 @@ def main():
     loss = outputs["loss"]
     preds = outputs["preds"]
     process_test_result(test_data, loss, preds, lambda1, lambda2)
+    print("This is MultiInput")
 
 
 if __name__ == "__main__":
