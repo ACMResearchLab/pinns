@@ -70,7 +70,6 @@ def get_dataset(file):
     Xarr = np.zeros((length, 2))
     Parr = np.zeros((length, timeSteps))
 
-
     n = 0
     while (n < timeSteps):
 

@@ -61,7 +61,7 @@ def main():
     # Data
     # data_path = Path("E:/donny/code/family/00/data/data.jsonl")
 
-    train_data, test_data, min_x, max_x = get_dataset("mats/airFoilOrig.csv")
+    train_data, test_data, min_x, max_x = get_dataset("mats/windAroundBuildings.csv")
     # train_data, test_data, min_x, max_x = get_orig_dataset()
 
     # Model
@@ -72,9 +72,9 @@ def main():
 
     # Train
     output_dir = Path(
-        "multiInput\pinn-large-tanh-bs128-lr0.005-lrstep1-lrgamma0.8-epoch20")
+        "windAroundBuildings\pinn-large-tanh-bs128-lr0.005-lrstep1-lrgamma0.8-epoch20")
     trainer = Trainer(model, output_dir)
-    trainer.trainMultiple(train_data)
+    trainer.train(train_data)
 
     # Test
     ckpt_dir = trainer.get_last_ckpt_dir()
@@ -89,7 +89,7 @@ def main():
     loss = outputs["loss"]
     preds = outputs["preds"]
     process_test_result(test_data, loss, preds, lambda1, lambda2)
-    print("This is MultiInput")
+    print("This is Airfoil")
 
 
 if __name__ == "__main__":
